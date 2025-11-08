@@ -24,7 +24,7 @@ SUPABASE_MEET_NAME_COLUMN = "meet"
 USAW_DOMAIN = "https://bwl.sport80.com"
 
 # Discord Configuration
-DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_RESULTS_WEBHOOK_URL")
+DISCORD_RESULTS_WEBHOOK_URL = os.environ.get("DISCORD_RESULTS_WEBHOOK_URL")
 
 # --- Logging Setup ---
 # GitHub Actions will capture stdout/stderr, so basic config is usually fine.
@@ -245,7 +245,7 @@ def fetch_max_id_from_supabase() -> int:
 
 def send_discord_notification(added_meet_names: list[str]):
     """Send a Discord notification with the names of meets added and timestamp."""
-    if not DISCORD_WEBHOOK_URL:
+    if not DISCORD_RESULTS_WEBHOOK_URL:
         logging.info("Discord webhook URL not configured. Skipping notification.")
         return
 
