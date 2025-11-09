@@ -614,7 +614,7 @@ def send_slack_notification(upsert_results: Dict):
     updated = upsert_results.get('updated', 0)
     updated_details = upsert_results.get('updated_details', [])
     
-    message = f"🏋️ BWL Records Scraper Completed\n"
+    message = f"🇬🇧 BWL Records Scraper Completed\n"
     message += f"• New records inserted: {inserted}\n"
     message += f"• Existing records updated: {updated}\n"
     message += f"• Total records processed: {inserted + updated}\n"
