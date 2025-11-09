@@ -9,14 +9,11 @@ import os
 import re
 import logging
 import requests
-import base64
+import json
 from datetime import datetime, timezone
-from io import BytesIO
 from typing import List, Dict, Optional
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
-from PIL import Image
-import json
 
 # Load environment variables
 load_dotenv()
@@ -142,13 +139,13 @@ class BWLRecordsScraper:
         
         return unique_categories
 
-    def download_image(self, url: str) -> Optional[Image.Image]:
-        """Download PNG image from URL"""
+    def download_image(self, url: str) -> Optional[bytes]:
+        """Download PNG image from URL (legacy method, not used with OpenAI)"""
         try:
             logging.info(f"Downloading image: {url}")
             response = self.session.get(url, timeout=30)
             response.raise_for_status()
-            return Image.open(BytesIO(response.content))
+            return response.content
         except Exception as e:
             logging.error(f"Error downloading image from {url}: {e}")
             return None
@@ -322,7 +319,7 @@ Extract ALL weight classes you see in the table."""
             logging.error(f"Error parsing image with OpenAI: {e}", exc_info=True)
             return []
 
-    def parse_record_image(self, image: Image.Image, category: str) -> List[Dict]:
+    def parse_record_image(self, image_data: bytes, category: str) -> List[Dict]:
         """Legacy OCR method - kept for backward compatibility"""
         logging.warning("OCR method is deprecated. Use parse_record_image_with_openai instead.")
         return []
