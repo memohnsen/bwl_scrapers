@@ -258,12 +258,12 @@ def send_slack_notification(added_meet_names: list[str]):
     
     # Create the message
     if not added_meet_names:
-        message = f"No new BWL meet results added to Supabase"
+        message = f"🇬🇧 No new BWL meet results added to Supabase"
     elif len(added_meet_names) == 1:
-        message = f"1 BWL Meet Added to Supabase:\n• {added_meet_names[0]}"
+        message = f"🇬🇧 1 BWL Meet Added to Supabase:\n• {added_meet_names[0]}"
     else:
         meet_list = "\n".join([f"• {name}" for name in added_meet_names])
-        message = f"{len(added_meet_names)} BWL Meets Added to Supabase:\n{meet_list}"
+        message = f"🇬🇧 {len(added_meet_names)} BWL Meets Added to Supabase:\n{meet_list}"
     
     payload = {
         "text": message

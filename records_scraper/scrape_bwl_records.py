@@ -738,7 +738,7 @@ def main():
     send_slack_notification(upsert_results)
     
     total = upsert_results['inserted'] + upsert_results['updated']
-    logging.info(f"BWL Records Scraper completed. Inserted: {upsert_results['inserted']}, Updated: {upsert_results['updated']}, Total: {total}")
+    logging.info(f"🇬🇧 BWL Records Scraper completed. Inserted: {upsert_results['inserted']}, Updated: {upsert_results['updated']}, Total: {total}")
 
 
 if __name__ == "__main__":
