@@ -28,8 +28,8 @@ END_YEAR = datetime.now(timezone.utc).year
 # Rate limiting to avoid overwhelming the API
 DELAY_BETWEEN_EVENTS = 1  # seconds between fetching each event's results
 
-# Discord Configuration (optional for notifications)
-DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_RESULTS_WEBHOOK_URL")
+# Slack Configuration (optional for notifications)
+SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL")
 
 # --- Logging Setup ---
 logging.basicConfig(
@@ -255,20 +255,20 @@ def fetch_max_id_from_supabase() -> int:
         return 0
 
 
-def send_discord_notification(message: str):
-    """Send a Discord notification."""
-    if not DISCORD_WEBHOOK_URL:
-        logging.info("Discord webhook URL not configured. Skipping notification.")
+def send_slack_notification(message: str):
+    """Send a Slack notification."""
+    if not SLACK_WEBHOOK_URL:
+        logging.info("Slack webhook URL not configured. Skipping notification.")
         return
     
-    payload = {"content": message}
+    payload = {"text": message}
     
     try:
-        response = requests.post(DISCORD_WEBHOOK_URL, json=payload, timeout=30)
+        response = requests.post(SLACK_WEBHOOK_URL, json=payload, timeout=30)
         response.raise_for_status()
-        logging.info(f"Discord notification sent successfully")
+        logging.info(f"Slack notification sent successfully")
     except requests.exceptions.RequestException as e:
-        logging.error(f"Failed to send Discord notification: {e}")
+        logging.error(f"Failed to send Slack notification: {e}")
 
 
 def main():
@@ -282,7 +282,7 @@ def main():
         return
 
     # Send start notification
-    send_discord_notification(
+    send_slack_notification(
         f"🚀 Started bulk import of Sport80 events ({START_YEAR}-{END_YEAR})"
     )
 
@@ -293,7 +293,7 @@ def main():
 
     if not all_events_data:
         logging.info("No events fetched from Sport80. Exiting.")
-        send_discord_notification("⚠️ Bulk import completed: No events found")
+        send_slack_notification("⚠️ Bulk import completed: No events found")
         return
     
     logging.info(f"Total events fetched: {len(all_events_data)}")
@@ -449,7 +449,7 @@ def main():
         f"• Skipped: {skipped_count}\n"
         f"• Errors: {error_count}"
     )
-    send_discord_notification(summary_message)
+    send_slack_notification(summary_message)
 
 
 if __name__ == "__main__":

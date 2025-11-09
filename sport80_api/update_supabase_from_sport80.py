@@ -3,6 +3,10 @@ import os
 import requests
 import logging
 from datetime import datetime, timezone
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Assuming your sport80 library is in a package named 'sport80_scraper'
 # located in the same parent directory as this script, or installed.
@@ -23,8 +27,8 @@ SUPABASE_MEET_NAME_COLUMN = "meet"
 # Sport80 Configuration
 USAW_DOMAIN = "https://bwl.sport80.com"
 
-# Discord Configuration
-DISCORD_RESULTS_WEBHOOK_URL = os.environ.get("DISCORD_RESULTS_WEBHOOK_URL")
+# Slack Configuration
+SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL")
 
 # --- Logging Setup ---
 # GitHub Actions will capture stdout/stderr, so basic config is usually fine.
@@ -243,10 +247,10 @@ def fetch_max_id_from_supabase() -> int:
         return 0
 
 
-def send_discord_notification(added_meet_names: list[str]):
-    """Send a Discord notification with the names of meets added and timestamp."""
-    if not DISCORD_RESULTS_WEBHOOK_URL:
-        logging.info("Discord webhook URL not configured. Skipping notification.")
+def send_slack_notification(added_meet_names: list[str]):
+    """Send a Slack notification with the names of meets added and timestamp."""
+    if not SLACK_WEBHOOK_URL:
+        logging.info("Slack webhook URL not configured. Skipping notification.")
         return
 
     # Get current timestamp in a readable format
@@ -254,25 +258,25 @@ def send_discord_notification(added_meet_names: list[str]):
     
     # Create the message
     if not added_meet_names:
-        message = f"No new meets added to Supabase at {current_time}"
+        message = f"No new meets added to Supabase"
     elif len(added_meet_names) == 1:
-        message = f"1 Meet Added to Supabase at {current_time}:\n• {added_meet_names[0]}"
+        message = f"1 Meet Added to Supabase:\n• {added_meet_names[0]}"
     else:
         meet_list = "\n".join([f"• {name}" for name in added_meet_names])
-        message = f"{len(added_meet_names)} Meets Added to Supabase at {current_time}:\n{meet_list}"
+        message = f"{len(added_meet_names)} Meets Added to Supabase:\n{meet_list}"
     
     payload = {
-        "content": message
+        "text": message
     }
     
     try:
-        response = requests.post(DISCORD_RESULTS_WEBHOOK_URL, json=payload, timeout=30)
+        response = requests.post(SLACK_WEBHOOK_URL, json=payload, timeout=30)
         response.raise_for_status()
-        logging.info(f"Discord notification sent successfully: {message}")
+        logging.info(f"Slack notification sent successfully: {message}")
     except requests.exceptions.RequestException as e:
-        logging.error(f"Failed to send Discord notification: {e}")
+        logging.error(f"Failed to send Slack notification: {e}")
         if hasattr(e, 'response') and e.response is not None:
-            logging.error(f"Discord webhook response: {e.response.text}")
+            logging.error(f"Slack webhook response: {e.response.text}")
 
 
 def main():
@@ -293,7 +297,8 @@ def main():
 
     candidate_event_details = []
     for event_data_item in recent_sport80_events_data:
-        meet_name = get_nested_value(event_data_item, "meet") # Primary source for meet name from Sport80
+        # BWL uses "event" as the field name (not "meet")
+        meet_name = event_data_item.get("event")
         event_id_str = "N/A"
         try:
             event_id_str = str(event_data_item['action'][0]['route'].split('/')[-1]).strip()
@@ -403,8 +408,8 @@ def main():
 
     logging.info(f"Finished Sport80 to Supabase sync. Added results for {len(added_meet_names)} new meet(s).")
 
-    # Send Discord notification with meet names
-    send_discord_notification(added_meet_names)
+    # Send Slack notification with meet names
+    send_slack_notification(added_meet_names)
 
 if __name__ == "__main__":
     main()
