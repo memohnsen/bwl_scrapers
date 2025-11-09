@@ -2,7 +2,8 @@ name: BWL Records Scraper
 
 on:
   schedule:
-    - cron: '15 3 * * *'
+    # Run every Monday at 3:15 AM UTC (once a week since records don't change often)
+    - cron: '15 3 * * 1'
   workflow_dispatch: # Allow manual trigger
 
 jobs:
